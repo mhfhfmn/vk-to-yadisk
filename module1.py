@@ -1,6 +1,7 @@
 import time
 import requests
 from pprint import pprint
+from progress.bar import Bar
 from tqdm import tqdm
 
 
@@ -40,8 +41,10 @@ class VkUser:
 }
         albums_id = ['wall', 'profile', 'saved']
         req = requests.get(get_albums_id_url, params={**self.params, **get_albums_id_url_params}).json()['response']['items']
-        for id in tqdm(req):
+
+        for id in tqdm(req, desc="Собираем альбомы", ncols=100):
             albums_id.append(id['id'])
+        print(f'''Всего найдено {len(albums_id)} альбомов''')
         return albums_id
 
 
@@ -50,33 +53,52 @@ class VkUser:
     def get_photo_url(self):
         albums_list = self.get_albums_id()
         get_photo_url = self.url + 'photos.get'
-        fotos_for_get = []
-        for album in tqdm(albums_list):
+        photos_for_get = []
+        for album in albums_list:
             req = requests.get(get_photo_url, params={**self.params, 'owner_id' : user_id, 'album_id':album, 'photo_size':0, 'extended':1}, ).json()
-            if 'response' in req.keys():
-                for foto in tqdm(req['response']['items']):
-                    foto_param = []
-                    foto_likes = foto['likes']['count']
 
-                    for size in foto['sizes']:
+            if 'response' in req.keys():
+
+                for photo in tqdm(req['response']['items'], desc="Собираем фотографии", ncols=100):
+                    photo_param = []
+                    photo_likes = photo['likes']['count']
+                    for size in photo['sizes']:
                         if 'w' in size['type']:
-                            foto_param = {'foto likes' : foto_likes,
+                            photo_param = {'photo likes' : photo_likes,
                                            'size' : size['type'],
                                            'url' : size['url']}
                         elif 'z' in size['type']:
-                            foto_param = {'foto likes' : foto_likes,
+                            photo_param = {'photo likes' : photo_likes,
                                            'size' : size['type'],
                                            'url' : size['url']}
                         elif 'y' in size['type']:
-                            foto_param = {'foto likes' : foto_likes,
+                            photo_param = {'photo likes' : photo_likes,
                                            'size' : size['type'],
                                            'url' : size['url']}
-                    fotos_for_get.append(foto_param)
+                    photos_for_get.append(photo_param)
 
             else:
                 pass
 
-        return fotos_for_get
+        return photos_for_get
+
+    def repeat_name(self):
+        photo_list = self.get_photo_url()
+        for photo in tqdm(photo_list, desc="Формируем названия файлов", ncols=100):
+            prefix = 1
+            for next_photo in photo_list[photo_list.index(photo)+1::]:
+                if photo['photo likes'] == next_photo['photo likes']:
+                    next_photo['photo likes'] = f'''{next_photo['photo likes']}_{prefix}'''
+                    prefix += 1
+        print(f'''Всего найдено {len(photo_list)} фотографий''')
+        return photo_list
+
+
+
+
+
+
+
 """
             pprint(req)
             i = i + 1
@@ -89,8 +111,13 @@ class VkUser:
 
 
 Sonya = VkUser()
-ids = Sonya.get_photo_url()
+ids = Sonya.repeat_name()
 #pprint(ids)
+
+
+
+
+
 
 
 
