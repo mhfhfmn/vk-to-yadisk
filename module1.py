@@ -5,7 +5,7 @@ from progress.bar import Bar
 from tqdm import tqdm
 
 
-vk_token = '958eb5d439726565e9333aa30e50e0f937ee432e927f0dbd541c541887d919a7c56f95c04217915c32008'
+vk_token = 'a67f00c673c3d4b12800dd0ba29579ec56d804f3c5f3bbcef5328d4b3981fa5987b951cf2c8d8b24b9abd'
 user_id = '492322841'
 version = '5.131'
 yadisk_token = 'AQAAAABdQYihAADLW-kcmghJMEY7lfJZUpFynMA'
@@ -41,14 +41,13 @@ class VkUser:
 }
         albums_id = ['wall', 'profile', 'saved']
         req = requests.get(get_albums_id_url, params={**self.params, **get_albums_id_url_params}).json()['response']['items']
-
         for id in tqdm(req, desc="Собираем альбомы", ncols=100):
             albums_id.append(id['id'])
         print(f'''Всего найдено {len(albums_id)} альбомов''')
         return albums_id
 
 
-##  Метод формирует список словарей со данными по свем фотографиям из всех альбомов(кол-во лайков, размер, URL)
+##  Метод формирует список словарей с данными по свем фотографиям из всех альбомов(кол-во лайков, размер, URL)
 
     def get_photo_url(self):
         albums_list = self.get_albums_id()
@@ -94,16 +93,12 @@ class VkUser:
         return photo_list
 
 
-
-
-
-
-
 """
-            pprint(req)
-            i = i + 1
-            print(i)
+class YaUser:
+    url =
 """
+
+
 
 #class YaDiskUser:
 
